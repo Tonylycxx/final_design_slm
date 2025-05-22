@@ -2,8 +2,8 @@ import pickle
 import numpy as np
 import torch
 import argparse
-from .slm_train import *
-from .slms_train import SlmsAttentionModule
+from slm_train import *
+from slms_train import SlmsAttentionModule
 
 
 top_ks = [1, 5, 10, 20]
