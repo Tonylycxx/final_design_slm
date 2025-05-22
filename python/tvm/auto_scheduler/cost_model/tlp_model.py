@@ -8,7 +8,7 @@ from tvm.auto_scheduler.feature import get_per_store_features_from_states_tlp, g
 logger = logging.getLogger("auto_scheduler")
 
 
-class SlmModel(PythonBasedModel):
+class TLPModel(PythonBasedModel):
     """The wrapper of MLPModelInternal. So we can use it in end-to-end search."""
     def __init__(self, target, max_line_len=25, max_vec_len=22):
         super().__init__()
@@ -36,6 +36,5 @@ class SlmModel(PythonBasedModel):
 
     def load(self, file_name: str):
         with open(file_name, 'rb') as f:
-            device = "cuda:0" if torch.cuda.is_available() else "cpu"
-            self.model = pickle.load(f).module.to(device)
+            self.model = pickle.load(f).module.to('cuda:0')
         self.model.eval()
