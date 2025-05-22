@@ -48,7 +48,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.save_name == '':
-        args.save_name = f'mtl_tlp_dataset_{len(args.union_datasets)}.pkl'
+        args.save_name = f'slms_dataset_{len(args.union_datasets)}.pkl'
 
     print(args)
     union_all()

@@ -163,7 +163,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.save_name == '':
-        args.save_name = 'tlp_dataset_' + os.path.basename(os.path.normpath(args.json_files_path)).replace('-', '_')
+        args.save_name = 'slm_dataset_' + os.path.basename(os.path.normpath(args.json_files_path)).replace('-', '_')
 
     hold_out_tasks = []
     files = [
@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
     hold_out_tasks_set = set([task.workload_key for task in hold_out_tasks])
 
-    with open('tlp_make_dataset_str_to_idx_%s.pkl' % args.platform, 'rb') as f:
+    with open('slm_make_dataset_str_to_idx_%s.pkl' % args.platform, 'rb') as f:
         workloadkey_to_index, stepname_to_idx, auto_unroll_max_step_to_idx = pickle.load(f)
 
     stepname_to_idx_one_hot = {}
