@@ -37,6 +37,6 @@ class SlmPModel(PythonBasedModel):
     def load(self, file_name: str):
         with open(file_name, 'rb') as f:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
-            self.model = pickle.load(f, map_location=device).module.to(device)
+            self.model = torch.load(f, map_location=device).module.to(device)
 
         self.model.eval()
