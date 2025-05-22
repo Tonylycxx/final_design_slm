@@ -199,6 +199,10 @@ class Step : public ObjectRef {
    */
   StepNode* CopyOnWrite();
 
+  void swap(Step& other) {
+    std::swap(data_, other.data_);
+  }
+
   TVM_DEFINE_OBJECT_REF_METHODS(Step, ObjectRef, StepNode);
 };
 
