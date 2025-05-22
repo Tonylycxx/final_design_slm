@@ -26,7 +26,7 @@ class SlmPModel(PythonBasedModel):
         file_vec = []
         file_vec = get_per_store_features_from_states_tlp(
             states, task, self.max_vec_len, self.max_line_len)
-        file_vec = torch.FloatTensor(file_vec).to('cuda')
+        file_vec = torch.FloatTensor(file_vec).to('cuda:0')
         with torch.no_grad():
             ret = self.model(file_vec)
         if isinstance(ret, list) and len(ret) > 0:
@@ -37,6 +37,5 @@ class SlmPModel(PythonBasedModel):
     def load(self, file_name: str):
         with open(file_name, 'rb') as f:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
-            self.model = torch.load(f, map_location=device).module.to(device)
-
+            self.model = pickle.load(f, map_location=device).module.to(device)
         self.model.eval()
