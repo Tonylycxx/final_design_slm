@@ -9,7 +9,7 @@ from torch import optim
 import argparse
 
 
-class MTLTLPAttentionModule(nn.Module):  
+class SlmsAttentionModule(nn.Module):  
     def __init__(self):
         super().__init__()
         self.fea_size = args.fea_size
@@ -239,7 +239,7 @@ def train(train_loader, val_dataloader, device):
     # n_epoch = 50
     args.hidden_dim = [64, 128, 256, 256]
     args.out_dim = [256, 128, 64, 1]
-    net = MTLTLPAttentionModule().to(device)
+    net = SlmsAttentionModule().to(device)
     net = torch.nn.DataParallel(net).to(torch.cuda.current_device())
 
     if args.rank_mse == 'rank':

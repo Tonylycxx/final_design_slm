@@ -16,8 +16,8 @@ from dump_network_info import get_network_with_key, get_network_task
 from common import str2bool, log_line, BenchmarkRecord
 
 from search import random_search, local_search, default_search
-from tlp_train import *
-from mtl_tlp_train import MTLTLPAttentionModule
+from scripts.slm_train import *
+from scripts.slms_train import SlmsAttentionModule
 
 
 def get_network(network_args, target):

@@ -183,7 +183,9 @@ class SketchPolicy(SearchPolicy):
         "sample_init_use_measured_ratio": 0.2,
         "evolutionary_search_population": 2048,
         "evolutionary_search_num_iters": 4,
-        "evolutionary_search_mutation_prob": 0.85,
+        "evolutionary_search_mutation_prob": 0.15,
+        "evolutionary_search_crossover_population": 2048,
+        "evolutionary_search_crossover_probability": 0.5,
         "cpu_multi_level_tiling_structure": "SSRSRS",
         "gpu_multi_level_tiling_structure": "SSSRRSRS",
         # Notice: the default thread bind policy of GPU assumes the tiling structure to have at

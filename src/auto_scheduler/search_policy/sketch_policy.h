@@ -70,6 +70,10 @@ struct SketchParamKey {
     static constexpr const char* num_iters = "evolutionary_search_num_iters";
     /*! \brief The mutation probability.*/
     static constexpr const char* mutation_prob = "evolutionary_search_mutation_prob";
+    /*! \brief The population size of crossover in evolutionary search.*/
+    static constexpr const char* crossover_population = "evolutionary_search_crossover_population";
+    /*! \brief The crossover probability.*/
+    static constexpr const char* crossover_probability = "evolutionary_search_crossover_probability";
   };
 
   struct MultiLevelTiling {

@@ -490,7 +490,9 @@ Array<State> SketchPolicyNode::EvolutionarySearch(const Array<State>& init_popul
   auto tic_begin = std::chrono::high_resolution_clock::now();
 
   size_t population = GetIntParam(params, SketchParamKey::EvolutionarySearch::population);
+  size_t crossover_population = GetIntParam(params, SketchParamKey::EvolutionarySearch::crossover_population);
   double mutation_prob = GetDoubleParam(params, SketchParamKey::EvolutionarySearch::mutation_prob);
+  double crossover_prob = GetDoubleParam(params, SketchParamKey::EvolutionarySearch::crossover_probability);
   int num_iters = GetIntParam(params, SketchParamKey::EvolutionarySearch::num_iters);
 
   bool is_cost_model_reasonable = !program_cost_model->IsInstance<RandomModelNode>();
@@ -585,7 +587,41 @@ Array<State> SketchPolicyNode::EvolutionarySearch(const Array<State>& init_popul
     // Compute selection probability
     ComputePrefixSumProb(pop_scores, &pop_selection_probs);
 
-    // TODO(merrymercy, comaniac): add crossover.
+    // Do crossover.
+    while(pnow->size() < total_population) {
+      int first = RandomChoose(pop_selection_probs, &rand_gen);
+      int second = RandomChoose(pop_selection_probs, &rand_gen);
+      while (second == first || (*pnow)[first]->sketch_hash != (*pnow)[second]->sketch_hash) {
+        second = RandomChoose(pop_selection_probs, &rand_gen);
+      }
+      State left_parent = (*pnow)[first];
+      State right_parent = (*pnow)[second];
+      Array<Stage> left_stages = left_parent->stages;
+      Array<Stage> right_stages = right_parent->stages;
+
+      if (left_stages.size() != right_stages.size()) {
+        StdCout(verbose) << left_parent->sketch_hash << " " << right_parent->sketch_hash << std::endl;
+      }
+      Array<Step> left_steps = left_parent->transform_steps;
+      Array<Step> right_steps = right_parent->transform_steps;
+      for (size_t stage_id = 0; stage_id < right_stages.size(); stage_id++) {
+        if (left_stages[stage_id]->op_type == StageKind::kPlaceholder)
+          continue;
+        if (dis(rand_gen) < crossover_prob) {
+          for (size_t j = 0; j < left_steps.size(); j++) {
+            if (static_cast<size_t>(left_steps[j]->stage_id) == stage_id) {
+              Step left_step = left_steps[j];
+              Step right_step = right_steps[j];
+              left_step.swap(right_step);
+            }
+          }
+        }
+      }
+      (*pnow).push_back(left_parent);
+      (*pnow).push_back(right_parent);
+    }
+    *pnow = search_task->compute_dag.InferBound(*pnow);
+    PruneInvalidState(search_task, pnow);
 
     // Do mutation
     while (pnext->size() < population) {

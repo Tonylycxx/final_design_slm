@@ -2,8 +2,8 @@ import pickle
 import numpy as np
 import torch
 import argparse
-from tlp_train import *
-from mtl_tlp_train import MTLTLPAttentionModule
+from scripts.slm_train import *
+from scripts.slms_train import SlmsAttentionModule
 
 
 top_ks = [1, 5, 10, 20]

@@ -288,8 +288,7 @@ class TaskScheduler:
         )
 
         assert len(self.tasks) != 0, "No tasks"
-        assert self.strategy in ["round-robin", "gradient"]
-
+        assert self.strategy in ["round-robin", "gradient", "ucb"]
         # task_cts[i] saves how many times task i is tuned
         self.task_cts = [0 for _ in range(len(self.tasks))]
 
@@ -481,6 +480,80 @@ class TaskScheduler:
                     task_idx = np.random.choice(len(gradients))
                 else:
                     task_idx = np.argmin(gradients)
+            # 子图选取任务使用UCB算法
+            elif self.strategy == "ucb":
+                gradients = []
+                for i in range(len(self.tasks)):
+                    if i in self.dead_tasks:
+                        gradients.append(0)
+                        continue
+
+                    # compute gradient from chain rule : (delta f / delta g_i)
+                    delta = 1e-4
+                    new_costs = list(self.best_costs)
+                    new_costs[i] -= delta
+                    chain_grad = (
+                        self._compute_score(self.best_costs) - self._compute_score(new_costs)
+                    ) / delta
+
+                    # compute (g_i(t_i) - g(t_i - \Delta t)) / (\Delta t)
+                    if (
+                        self.task_cts[i] - 1 < len(self.task_costs_history[i])
+                        and self.task_cts[i] - 1 - self.backward_window_size >= 0
+                    ):
+                        backward_grad = (
+                            self.task_costs_history[i][self.task_cts[i] - 1]
+                            - self.task_costs_history[i][
+                                self.task_cts[i] - 1 - self.backward_window_size
+                            ]
+                        ) / self.backward_window_size
+                    else:
+                        backward_grad = 0
+
+                    # compute (g_i(t_i + \Delta t) - g(t_i)) / (\Delta t)
+                    g_next_1 = self.best_costs[i] - (self.best_costs[i] / self.task_cts[i])
+
+                    g_next_2 = self.beta * 1e30
+                    group_id = self.tag_to_group_id.get(self.task_tags[i], None)
+                    if group_id is not None and len(self.group_task_ids[group_id]) > 1:
+                        best_flops = max(
+                            [
+                                self.flop_cts[j] / self.best_costs[j]
+                                for j in self.group_task_ids[group_id]
+                            ]
+                        )
+                        g_next_2 = self.beta * self.flop_cts[i] / best_flops
+
+                    g_next = min(g_next_1, g_next_2)
+                    forward_grad = g_next - self.best_costs[i]
+
+                    # combine all grads
+                    grad = chain_grad * (
+                        self.alpha * backward_grad + (1 - self.alpha) * forward_grad
+                    )
+                    assert grad <= 0
+                    gradients.append(grad)
+
+                ucb_expectations = []
+                ucb_confidences = []
+                ucbs = []
+
+                min_gradient = min(gradients)
+                total_cnt = sum(self.task_cts)
+
+                for i, gradient in enumerate(gradients):
+                    ucb_expectations.append(gradient / min_gradient)
+                    
+                for i, task_ct in enumerate(self.task_cts):
+                    ucb_confidences.append(self.confidence_const * np.sqrt((2.0 * np.log(total_cnt)) / (task_ct * 1.0)))
+
+                for i in range(len(ucb_expectations)):
+                    ucbs.append(ucb_expectations[i] + ucb_confidences[i])
+                    
+                if max(ucbs) == min(ucbs):
+                    task_idx = np.random.choice(len(ucbs))
+                else:
+                    task_idx = np.argmax(ucbs)
             else:
                 raise ValueError("Invalid strategy: " + self.strategy)
 
