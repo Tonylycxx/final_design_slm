@@ -255,6 +255,8 @@ class StateNode : public Object {
    * tile sizes of the state is filled. Only concrete state can be apply to TVM schedule.
    */
   bool concrete;
+  
+  size_t sketch_hash;
 
   void VisitAttrs(tvm::AttrVisitor* v) {
     v->Visit("stages", &stages);

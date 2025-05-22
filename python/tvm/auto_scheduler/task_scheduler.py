@@ -480,7 +480,7 @@ class TaskScheduler:
                     task_idx = np.random.choice(len(gradients))
                 else:
                     task_idx = np.argmin(gradients)
-            # 子图选取任务使用UCB算法
+            # 使用UCB算法
             elif self.strategy == "ucb":
                 gradients = []
                 for i in range(len(self.tasks)):

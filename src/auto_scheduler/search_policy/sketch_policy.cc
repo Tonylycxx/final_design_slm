@@ -491,6 +491,7 @@ Array<State> SketchPolicyNode::EvolutionarySearch(const Array<State>& init_popul
 
   size_t population = GetIntParam(params, SketchParamKey::EvolutionarySearch::population);
   size_t crossover_population = GetIntParam(params, SketchParamKey::EvolutionarySearch::crossover_population);
+  size_t total_population = population + crossover_population;
   double mutation_prob = GetDoubleParam(params, SketchParamKey::EvolutionarySearch::mutation_prob);
   double crossover_prob = GetDoubleParam(params, SketchParamKey::EvolutionarySearch::crossover_probability);
   int num_iters = GetIntParam(params, SketchParamKey::EvolutionarySearch::num_iters);
